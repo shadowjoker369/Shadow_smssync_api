@@ -1,19 +1,25 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Cross-origin এর জন্য দরকার হতে পারে
 
-@app.route('/', methods=['POST'])  # ❗ এখানে POST স্পষ্ট করে বলা আছে
+@app.route("/", methods=["GET", "POST"])
 def receive_sms():
-    data = request.get_json()
-    number = data.get("number")
-    message = data.get("message")
+    if request.method == "POST":
+        data = request.get_json()
 
-    print("Number:", number)
-    print("Message:", message)
+        if not data:
+            return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
-    return jsonify({"status": "success", "number": number, "message": message})
+        sender = data.get("from")
+        message = data.get("message")
+        timestamp = data.get("sent_timestamp")
 
-if __name__ == '__main__':
-    app.run()
+        print(f"📩 New SMS from {sender} at {timestamp}: {message}")
+
+        return jsonify({"status": "success", "message": "SMS received"}), 200
+
+    else:  # For GET request
+        return jsonify({"status": "ok", "message": "Shadow SMS Sync API is live"}), 200
+
+if __name__ == "__main__":
+    app.run(debug=True)

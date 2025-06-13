@@ -1,25 +1,23 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # 👉 এটিই CORS সমস্যা সমাধান করবে
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["POST"])
 def receive_sms():
-    if request.method == "POST":
-        data = request.get_json()
+    data = request.get_json()
 
-        if not data:
-            return jsonify({"status": "error", "message": "No JSON payload received"}), 400
+    if not data:
+        return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
-        sender = data.get("from")
-        message = data.get("message")
-        timestamp = data.get("sent_timestamp")
+    sender = data.get("number")
+    message = data.get("message")
 
-        print(f"📩 New SMS from {sender} at {timestamp}: {message}")
+    print(f"📩 Send request to {sender}: {message}")
 
-        return jsonify({"status": "success", "message": "SMS received"}), 200
+    return jsonify({"status": "success", "message": "Message received"}), 200
 
-    else:  # For GET request
-        return jsonify({"status": "ok", "message": "Shadow SMS Sync API is live"}), 200
-
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "ok", "message": "Shadow SMS Sync API is live"}), 200
